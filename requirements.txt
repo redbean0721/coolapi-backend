@@ -1,1 +1,12 @@
 fastapi[all]
+python-dotenv
+uvicorn
+fastapi-limiter
+PyMySQL
+pymongo
+DBUtils
+bcrypt
+pyotp
+mcstatus
+mcclient-lib
+aio-mc-rcon
