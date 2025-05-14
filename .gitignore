@@ -1,6 +1,8 @@
 test
 users.json
-counter.db
+counter.
+*.code-workspace
+*.db
 
 venv/
 # Byte-compiled / optimized / DLL files

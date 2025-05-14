@@ -10,3 +10,4 @@ pyotp
 mcstatus
 mcclient-lib
 aio-mc-rcon
+logto

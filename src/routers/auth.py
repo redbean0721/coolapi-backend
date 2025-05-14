@@ -1,10 +1,11 @@
-from fastapi import Depends, APIRouter, Security
+from fastapi import Depends, APIRouter, Security, Request, Response
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from fastapi_limiter.depends import RateLimiter
 from pydantic import BaseModel, EmailStr
 from src.database.mariadb import get_mariadb_connect
+from src.utils.auth import setCookie, verifyCookie
 import datetime
 import bcrypt
 import logging
@@ -19,7 +20,8 @@ ACCESS_TOKEN_EXPIRATION_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRATION_MINUTES
 router = APIRouter()
 
 class LoginRequest(BaseModel):
-    username_or_email: str
+    username: str = None  # 如果未提供，則為 None
+    email: EmailStr = None  # 如果未提供，則為 None
     password: str
 
 class RegisterRequest(BaseModel):
@@ -29,56 +31,66 @@ class RegisterRequest(BaseModel):
     name_first: str = None  # 如果未提供，則為 None
     name_last: str = None   # 如果未提供，則為 None
 
-
-async def hash_password(password: str) -> str:
-    salt = bcrypt.gensalt()
-    hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
-    return hashed.decode("utf-8")
-
-async def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
-
-async def generate_jwt_token(user_id: int, username: str, email: str) -> str:
-    expiration = datetime.datetime.utcnow() + datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRATION_MINUTES)
-    payload = {
-        "sub": str(user_id),
-        "username": username,
-        "email": email,
-        "exp": expiration
-    }
-    token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
-    return token
-
 @router.post("/auth/login", dependencies=[Depends(RateLimiter(times=15, seconds=300))])
-async def auth_login(request: LoginRequest):
-    # 檢查 username 或 email 是否存在
+async def auth_login(request: LoginRequest, response: Response):
     conn, cursor = await get_mariadb_connect()
+
+    if not request.username and not request.email:
+        raise HTTPException(status_code=400, detail="Username or email is required")
+    if request.username and "@" in request.username:
+        raise HTTPException(status_code=400, detail="Invalid username")
+
     try:
-        cursor.execute("SELECT * FROM users WHERE username = %s OR email = %s", (request.username_or_email, request.username_or_email))
-        user = cursor.fetchone()  # 使用 fetchone 獲取單條記錄
+        # 查詢使用者資料
+        cursor.execute("SELECT * FROM users WHERE username = %s OR email = %s", (request.username, request.email))
+        user = cursor.fetchone()
         if not user:
             raise HTTPException(status_code=404, detail="Invalid username or email")
-        
-        # 由於使用了字典型游標，這裡可以直接使用字串鍵
-        user_id = user['id']
-        username = user['username']
-        email = user['email']
-        hashed_password = user['password']
-        # 可以在這裡處理其他欄位（如果需要）
+
+        userId = user["id"]
+        username = user["username"]
+        email = user["email"]
+        hashed_password = user["password"]
+
+        # 如果密碼為空，代表可能是第三方登入帳號
+        if not hashed_password:
+            # 查詢綁定的 OAuth provider
+            cursor.execute("SELECT provider FROM user_oauth_accounts WHERE user_id = %s", (userId,))
+            oauth = cursor.fetchone()
+
+            if oauth:
+                provider = oauth["provider"]
+                redirect_url = f"/api/oauth/{provider}/login"
+                return JSONResponse(status_code=307, content={
+                    "message": f"請透過 {provider.capitalize()} 登入",
+                    "provider": provider,
+                    "redirect": redirect_url
+                })
+            else:
+                raise HTTPException(status_code=401, detail="此帳號尚未設定密碼或綁定第三方登入")
+
+        # 驗證密碼
+        if not bcrypt.checkpw(request.password.encode("utf-8"), hashed_password.encode("utf-8")):
+            raise HTTPException(status_code=401, detail="Invalid password")
+
+        # 登入成功，設置 Cookie
+        sessionId = await setCookie(response=response, userId=userId, loginType="local", cookieName="auth", maxAge=300)
+        return JSONResponse(content={
+            "message": "Login successful",
+            "sessionId": sessionId,
+            "userId": userId,
+            "username": username,
+            "email": email
+        }, status_code=200)
+    
+    except HTTPException:
+        # 如果是 HTTPException，則直接拋出
+        raise
     except Exception as e:
         logging.error(f"Database error: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
     finally:
         cursor.close()
-        conn.close()
-
-    # 驗證密碼
-    if not await verify_password(request.password, hashed_password):
-        raise HTTPException(status_code=403, detail="Invalid password")
-    
-    # 產生 JWT Token
-    token = await generate_jwt_token(user_id, username, email)
-    return JSONResponse(content={"message": "Login successful", "token": token}, status_code=200)
 
 
 @router.post("/auth/register", dependencies=[Depends(RateLimiter(times=15, seconds=300))])
@@ -87,18 +99,22 @@ async def auth_register(request: RegisterRequest):
     # If not, hash the password and insert the user into the database
     # 檢查 username 或 email 是否已被註冊
     conn, cursor = await get_mariadb_connect()
+    if request.username and "@" in request.username:
+        raise HTTPException(status_code=400, detail="Invalid username")
     try:
         cursor.execute("SELECT id FROM users WHERE username = %s OR email = %s", (request.username, request.email))
         existing_user = cursor.fetchall()
         if existing_user:
             raise HTTPException(status_code=409, detail="Username or email already exists")
+    except HTTPException:
+        raise
     except Exception as e:
         logging.error(f"Database error: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
     
     # Hash the password
     # 加密密碼
-    hashed_password = await hash_password(request.password)
+    hashed_password = bcrypt.hashpw(request.password.encode("utf-8"), bcrypt.gensalt()).decode()
 
     # Set default values for name_first and name_last if not provided
     name_first = request.name_first or request.username
@@ -106,26 +122,30 @@ async def auth_register(request: RegisterRequest):
 
     # Insert the user into the database
     # 將用戶存入資料庫
+    if not request.name_first:
+        request.name_first = request.username  # 如果沒有提供 name_first，則使用 username
+    if not request.name_last:
+        request.name_last = request.username  # 如果沒有提供 name_last，則使用 username
     try:
         cursor.execute(
             """
-            INSERT INTO users (uuid, username, email, password, is_active, name_first, name_last)
-            VALUES (UUID(), %s, %s, %s, 1, %s, %s)
+            INSERT INTO users (username, email, name_first, name_last, password)
+            VALUES (%s, %s, %s, %s, %s)
             """,
-            (request.username, request.email, hashed_password, name_first, name_last)
+            (request.username, request.email, name_first, name_last, hashed_password)
         )
-        conn.commit()  # Commit the transaction
+        conn.commit()
+    except HTTPException:
+        raise
     except Exception as e:
-        logging.error(f"Database error: {e}")
+        logging.error(f"Database error (insert user): {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
     finally:
         cursor.close()
-        conn.close()
 
     # Return success message
     # 回傳成功訊息
-    token = await generate_jwt_token(cursor.lastrowid, request.username, request.email)
-    return JSONResponse(content={"message": "Registration successful", "token": token}, status_code=201)
+    return JSONResponse(content={"message": "Registration successful",}, status_code=201)
 
 
 @router.post("/auth/re-passwd", dependencies=[Depends(RateLimiter(times=15, seconds=300))])
@@ -152,3 +172,21 @@ async def get_current_user(token: str = Security(oauth2_scheme)):
 @router.get("/auth/test", dependencies=[Depends(RateLimiter(times=60, seconds=300))])
 async def protected(current_user: dict = Depends(get_current_user)):
     return JSONResponse(content={"message": "You are authenticated", "user": current_user}, status_code=200)
+
+@router.get("/check_cookie", dependencies=[Depends(RateLimiter(times=60, seconds=300))])
+async def check_cookie(request: Request):
+    # 從 request 中獲取 cookie
+    session_id = request.cookies.get("auth")
+
+    # 如果沒有找到 sessionId，回傳 401 Unauthorized
+    if not session_id:
+        raise HTTPException(status_code=401, detail="No session cookie found")
+
+    # 驗證 sessionId 是否有效
+    is_valid = await verifyCookie(sessionId=session_id)
+
+    if not is_valid:
+        raise HTTPException(status_code=401, detail="Invalid or expired session")
+
+    # 如果驗證通過，返回成功訊息
+    return JSONResponse(content={"message": "Session is valid"}, status_code=200)

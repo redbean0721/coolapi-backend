@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.0.1-dev] - 2025-05-14
+### Added
+- Integrated *Logto as a new authentication method, providing users with more secure and flexible login options.
+- Implemented background task processing to handle long-running operations asynchronously, improving application responsiveness.
+
+### Changed
+- Updated the random image feature to utilize a new API endpoint, ensuring continued access to random images.
+
+### Other Changes
+- Numerous minor improvements, code refactoring, and bug fixes have been implemented throughout the application to enhance stability and performance.
+
+
 ## [2.0.0-dev] - 2025-03-09
 ### Changed
 - Code Refactoring: Rewrote all backend code to improve maintainability, performance, and scalability.

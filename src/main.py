@@ -1,4 +1,4 @@
-import logging, os, time
+import logging, os, time, asyncio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -9,6 +9,7 @@ import redis.asyncio as redis
 from src.database.mariadb import check_mariadb_connect
 from src.database.mongodb import check_mongodb_connect
 from src.utils.counter import check_counter
+from src.utils.backgroundtask import start_background_tasks, stop_background_tasks
 
 
 @asynccontextmanager
@@ -21,7 +22,9 @@ async def lifespan(_: FastAPI):
     logging.info("Done!")
     global start_time
     start_time = int(time.time())
+    await start_background_tasks()
     yield
+    await stop_background_tasks()
     await FastAPILimiter.close()
 
 app = FastAPI(title=os.getenv("API_TITLE"), version=os.getenv("API_VERSION"))
