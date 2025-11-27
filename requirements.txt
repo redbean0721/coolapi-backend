@@ -1,13 +1,34 @@
-fastapi[all]
+fastapi[all]    # email-validator, pydantic-settings, paydantic-extra-types, httpx, jinja2, python-multipart, itsdangerous, pyyaml, uvicorn, orjson, ujson
 python-dotenv
-uvicorn
-fastapi-limiter
-PyMySQL
-pymongo
-DBUtils
-bcrypt
+uvicorn[standard]
+gunicorn
+# uvloop
+# httptools
+# orjson
+# fastapi-limiter
+slowapi
+redis
+filelock
+# PyMySQL
+sqlalchemy
+asyncmy
+# pymongo
+# DBUtils
+passlib[argon2]
+python-jose
 pyotp
-mcstatus
-mcclient-lib
-aio-mc-rcon
-logto
+# mcstatus
+# mcclient-lib
+# aio-mc-rcon
+# logto
+setuptools
+pybreaker
+rq
+
+# pydantic
+# databases
+# aiomysql
+# alembic
+# pytest
+# pytest-asyncio
+# pyjwt

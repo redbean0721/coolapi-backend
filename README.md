@@ -2,7 +2,7 @@
 
 ## Backend Version
 
-Current UI version: 2.0.1-dev
+Current UI version: 2.2.0-dev
 
 ## Previous Version
 

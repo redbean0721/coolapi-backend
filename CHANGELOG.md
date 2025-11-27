@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.2.0-dev] - 2025-11-27
+### Changed
+- Refactored the entire codebase and switched to the `refactor/2.2.0` branch for development.
+- Migrated database operations from `pymysql` to `SQLAlchemy`.
+- Replaced the application server from `uvicorn` to `gunicorn`.
+- Improved the implementation of the Rate Limiter.
+- etc.
+
+### Notes
+- Version 2.1.0 was not released, skipped directly to 2.2.0-dev.
+
+
 ## [2.0.1-dev] - 2025-05-14
 ### Added
 - Integrated *Logto as a new authentication method, providing users with more secure and flexible login options.
