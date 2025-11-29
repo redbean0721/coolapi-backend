@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>測試郵件 / Test Email</title>
+    <title>Email 已變更 / Email Updated</title>
     <style>
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -50,13 +50,13 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>測試郵件</h1>
+            <h1>Email 已變更</h1>
         </div>
         <div class="content">
             <p>親愛的 {{ username }} 您好：</p>
-            <p>這是一封測試郵件，目的是確認郵件系統是否正常運作。</p>
-            <p>如果您收到此郵件，表示系統運作正常。</p>
-            <p>測試時間：{{ time }}</p>
+            <p>您的帳號 Email 已由 <strong>{{ old_email }}</strong> 更新為：</p>
+            <p><strong>{{ new_email }}</strong></p>
+            <p>如果您沒有變更 Email，請立即聯繫支持團隊。</p>
         </div>
         <div class="footer">
             &copy; {{ now().year }} {{ API_TITLE }}. 本郵件為系統自動發送，請勿回覆。

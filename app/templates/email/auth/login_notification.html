@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>測試郵件 / Test Email</title>
+    <title>新登入通知 / New Login Alert</title>
     <style>
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -50,13 +50,18 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>測試郵件</h1>
+            <h1>新登入通知</h1>
         </div>
         <div class="content">
             <p>親愛的 {{ username }} 您好：</p>
-            <p>這是一封測試郵件，目的是確認郵件系統是否正常運作。</p>
-            <p>如果您收到此郵件，表示系統運作正常。</p>
-            <p>測試時間：{{ time }}</p>
+            <p>我們偵測到您的帳號於以下時間從一個新的裝置登入：</p>
+            <p>
+                <strong>時間：</strong>{{ login_time }}<br>
+                <strong>IP：</strong>{{ ip_address }}<br>
+                <strong>裝置：</strong>{{ device_info }}<br>
+                <strong>位置（估計）：</strong>{{ location }}
+            </p>
+            <p>如果這不是您本人操作，建議立即變更密碼並啟用雙重驗證（2FA）以保護帳號安全。</p>
         </div>
         <div class="footer">
             &copy; {{ now().year }} {{ API_TITLE }}. 本郵件為系統自動發送，請勿回覆。

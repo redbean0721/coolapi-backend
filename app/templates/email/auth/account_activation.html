@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>測試郵件 / Test Email</title>
+    <title>帳號啟用 / Activate Your Account</title>
     <style>
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -37,6 +37,20 @@
         .content p {
             margin: 10px 0;
         }
+        .button {
+            display: inline-block;
+            margin: 20px 0;
+            padding: 12px 30px;
+            background-color: #4CAF50;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
         .footer {
             font-size: 12px;
             color: #777777;
@@ -50,13 +64,17 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>測試郵件</h1>
+            <h1>歡迎加入 {{ API_TITLE }}</h1>
         </div>
         <div class="content">
             <p>親愛的 {{ username }} 您好：</p>
-            <p>這是一封測試郵件，目的是確認郵件系統是否正常運作。</p>
-            <p>如果您收到此郵件，表示系統運作正常。</p>
-            <p>測試時間：{{ time }}</p>
+            <p>感謝您註冊 {{ API_TITLE }}！請點擊下方按鈕啟用您的帳號：</p>
+            <p style="text-align: center;">
+                <a class="button" href="{{ link }}">啟用帳號</a>
+            </p>
+            <p>如果按鈕無法點擊，請將以下連結複製並貼到瀏覽器中打開：</p>
+            <p style="word-break: break-all; color: #4CAF50;">{{ link }}</p>
+            <p>此連結僅在 24 小時內有效。如果您未曾註冊，請忽略此郵件。</p>
         </div>
         <div class="footer">
             &copy; {{ now().year }} {{ API_TITLE }}. 本郵件為系統自動發送，請勿回覆。

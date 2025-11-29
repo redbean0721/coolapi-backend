@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>測試郵件 / Test Email</title>
+    <title>API Key 建立成功 / API Key Created</title>
     <style>
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -50,13 +50,18 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>測試郵件</h1>
+            <h1>API Key 建立成功</h1>
         </div>
         <div class="content">
             <p>親愛的 {{ username }} 您好：</p>
-            <p>這是一封測試郵件，目的是確認郵件系統是否正常運作。</p>
-            <p>如果您收到此郵件，表示系統運作正常。</p>
-            <p>測試時間：{{ time }}</p>
+            <p>您已成功建立新的 API Key：</p>
+            <p>
+                <strong>名稱：</strong>{{ key_name }}<br>
+                <strong>描述：</strong>{{ description }}<br>
+                <strong>建立時間：</strong>{{ time }}<br>
+                <strong>授權：</strong>{{ permissions }}
+            </p>
+            <p>注意：API Key 僅會完整顯示一次，請務必妥善保存。</p>
         </div>
         <div class="footer">
             &copy; {{ now().year }} {{ API_TITLE }}. 本郵件為系統自動發送，請勿回覆。
