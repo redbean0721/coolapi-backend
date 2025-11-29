@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>測試郵件 / Test Email</title>
+    <title>API Key 已停用 / API Key Disabled</title>
     <style>
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -27,7 +27,7 @@
             margin-bottom: 20px;
         }
         .header h1 {
-            color: #4CAF50;
+            color: #FF5733;
             font-size: 24px;
         }
         .content {
@@ -50,13 +50,17 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>測試郵件</h1>
+            <h1>API Key 已停用</h1>
         </div>
         <div class="content">
             <p>親愛的 {{ username }} 您好：</p>
-            <p>這是一封測試郵件，目的是確認郵件系統是否正常運作。</p>
-            <p>如果您收到此郵件，表示系統運作正常。</p>
-            <p>測試時間：{{ time }}</p>
+            <p>以下 API Key 已被停用：</p>
+            <p>
+                <strong>名稱：</strong>{{ key_name }}<br>
+                <strong>停用時間：</strong>{{ time }}<br>
+                <strong>操作人：</strong>{{ operator }}（可能是系統或您本人）
+            </p>
+            <p>若非您本人操作，請立即聯繫我們。</p>
         </div>
         <div class="footer">
             &copy; {{ now().year }} {{ API_TITLE }}. 本郵件為系統自動發送，請勿回覆。

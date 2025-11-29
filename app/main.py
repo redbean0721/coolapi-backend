@@ -6,9 +6,14 @@ from slowapi.errors import RateLimitExceeded
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.middleware import SlowAPIMiddleware
 from dotenv import load_dotenv
-import os, time
+import os, pytz, time
 
 load_dotenv()
+
+try:
+    TIMEZONE_NAME = pytz.timezone(os.getenv("TIMEZONE"))
+except pytz.UnknownTimeZoneError:
+    TIMEZONE_NAME = pytz.UTC
 
 from app.database.mariadb import engine, Base
 from filelock import FileLock

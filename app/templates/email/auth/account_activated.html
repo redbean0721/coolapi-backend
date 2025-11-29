@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>測試郵件 / Test Email</title>
+    <title>帳號啟用成功 / Account Activated</title>
     <style>
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -37,6 +37,20 @@
         .content p {
             margin: 10px 0;
         }
+        .button {
+            display: inline-block;
+            margin: 20px 0;
+            padding: 12px 30px;
+            background-color: #4CAF50;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
         .footer {
             font-size: 12px;
             color: #777777;
@@ -50,13 +64,17 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>測試郵件</h1>
+            <h1>帳號啟用成功</h1>
         </div>
         <div class="content">
             <p>親愛的 {{ username }} 您好：</p>
-            <p>這是一封測試郵件，目的是確認郵件系統是否正常運作。</p>
-            <p>如果您收到此郵件，表示系統運作正常。</p>
-            <p>測試時間：{{ time }}</p>
+            <p>恭喜您，您的帳號已成功啟用！您現在可以使用 {{ API_TITLE }} 的所有功能。</p>
+            <p>如果您未曾進行此操作，請立即聯繫我們的客服團隊。</p>
+            <p style="text-align: center;">
+                <a class="button" href="{{ api_url }}/login">立即登入</a>
+            </p>
+            <p>祝您使用愉快！</p>
+            <p>{{ API_TITLE }} 團隊敬上</p>
         </div>
         <div class="footer">
             &copy; {{ now().year }} {{ API_TITLE }}. 本郵件為系統自動發送，請勿回覆。

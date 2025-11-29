@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.2.0-dev] - 2025-11-29
+### Added
+- Enhanced the login system to improve security and user experience.
+- Updated email templates for account-related notifications, including activation, password reset, and login alerts.
+
+### Changed
+- Refactored the authentication module to streamline the login process and integrate additional security measures.
+
+
 ## [2.2.0-dev] - 2025-11-27
 ### Changed
 - Refactored the entire codebase and switched to the `refactor/2.2.0` branch for development.
