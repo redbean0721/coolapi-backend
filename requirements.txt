@@ -12,11 +12,10 @@ filelock
 # PyMySQL
 sqlalchemy
 sqlmodel
-asyncmy
+aiomysql
 # pymongo
 # DBUtils
 passlib[argon2]
-python-jose
 PyJWT
 pyotp
 # mcstatus
