@@ -1,6 +1,7 @@
 #!/bin/bash
 exec gunicorn -c gunicorn.conf.py app.main:app
 
+# PYTHONPATH=$(pwd) python workers/email_worker.py &
 # gunicorn main:app \
 #     -k uvicorn.workers.UvicornWorker \  # 使用 Uvicorn 作為 Gunicorn 的工作類型
 #     --workers 4 \                      # 啟動 4 個工作進程

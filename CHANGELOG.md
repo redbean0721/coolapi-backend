@@ -1,5 +1,24 @@
 # Changelog
 
+## [2.2.0-dev] - 2026-01-08
+### Added
+- Implemented comprehensive event logging system with `events` and `user_event_logs` tables to track user activities and security events.
+- Added unified audit utility (`log_and_notify`) for centralized logging and email notification across authentication flows.
+- Introduced permission-based access control (RBAC) with support for roles and permissions for both users and API keys.
+- Added structured API response models for better Swagger/OpenAPI documentation, including request and response schemas for all auth endpoints.
+- Implemented 2FA (TOTP) support with temporary JWT tokens for enhanced account security.
+
+### Changed
+- Refactored authentication system: rewrote registration, login, logout, and account activation flows with improved security and error handling.
+- Migrated from sync Redis to async Redis for session management while maintaining sync Redis for RQ job queuing.
+- Updated database models to include TOTP secret fields and extended user event tracking capabilities.
+- Improved error response consistency across all endpoints with unified `ErrorResponse` model.
+
+### Fixed
+- Resolved slowapi compatibility issues by ensuring all endpoints return proper Response objects.
+- Fixed cookie handling for 2FA flows to properly distinguish between auth cookies and temporary 2FA cookies.
+
+
 ## [2.2.0-dev] - 2025-11-29
 ### Added
 - Enhanced the login system to improve security and user experience.

@@ -1,32 +1,31 @@
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from contextlib import asynccontextmanager
+from filelock import FileLock
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
+import os, time
+
 from app.rate_limiter import limiter
 from slowapi.errors import RateLimitExceeded
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.middleware import SlowAPIMiddleware
-from dotenv import load_dotenv
-import os, pytz, time
 
-load_dotenv()
-
-try:
-    TIMEZONE_NAME = pytz.timezone(os.getenv("TIMEZONE"))
-except pytz.UnknownTimeZoneError:
-    TIMEZONE_NAME = pytz.UTC
-
-from app.database.mariadb import engine, Base
-from filelock import FileLock
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # 在這裡放置啟動代碼
-    lock_file = "/tmp/db_init.lock" # 用於確保只有一個實例在初始化資料庫
-    with FileLock(lock_file):
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
+    from app.database.mariadb import init_db
+    with FileLock(lock_file="/tmp/db_init.lock"):   # 用於確保只有一個實例執行初始化資料庫
+        await init_db()
+    
+    from app.database.redis import init_redis, close_redis
+    await init_redis()
     global start_time
     start_time = int(time.time())
     yield
+    await close_redis()
     # 在這裡放置關閉代碼
 
 app = FastAPI(

@@ -11,4 +11,4 @@ async def index():
 
 @router.get("/status")
 async def status():
-    return ORJSONResponse(content={"status": "ok"})
+    return ORJSONResponse(content={"status": "OK"})
