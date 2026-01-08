@@ -11,11 +11,13 @@ redis
 filelock
 # PyMySQL
 sqlalchemy
+sqlmodel
 asyncmy
 # pymongo
 # DBUtils
 passlib[argon2]
 python-jose
+PyJWT
 pyotp
 # mcstatus
 # mcclient-lib

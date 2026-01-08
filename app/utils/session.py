@@ -1,4 +1,4 @@
-from app.database.redis import redis
+from app.database.redis import get_redis
 import os, secrets
 
 COOKIE_NAME = os.getenv("COOKIE_NAME")
@@ -11,5 +11,10 @@ COOKIE_DOMAIN = os.getenv("COOKIE_DOMAIN")
 
 async def create_session(user_id: int) -> str:
     session_token = secrets.token_urlsafe(32)
+    redis = await get_redis()
     await redis.setex(f"session:{session_token}", COOKIE_MAX_AGE, user_id)
     return session_token
+
+async def delete_session(session_token: str) -> None:
+    redis = await get_redis()
+    await redis.delete(f"session:{session_token}")
