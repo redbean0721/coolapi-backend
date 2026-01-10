@@ -157,3 +157,238 @@ LOGIN_DOC = {
         }
     }
 }
+
+# 2FA 驗證
+class TwoFARequest(BaseModel):
+    totp_code: str = Field(min_length=6, max_length=6, pattern=r"^\d{6}$", description="6-digit TOTP code")
+
+class TwoFAResponse(BaseModel):
+    success: bool = True
+    message: str = "2FA verification successful"
+    # setCookie
+
+TWO_FA_DOC = {
+    400: {
+        "model": ErrorResponse,
+        "description": "User does not have 2FA enabled",
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "2FA is not enabled for this account",
+                    "details": None
+                }
+            }
+        }
+    },
+    401: {
+        "model": ErrorResponse,
+        "description": "Authentication failed - invalid JWT cookie, expired token, or incorrect TOTP code",
+        "content": {
+            "application/json": {
+                "examples": {
+                    "missing_cookie": {
+                        "summary": "Missing 2FA JWT cookie",
+                        "value": {
+                            "success": False,
+                            "message": "2FA cookie missing",
+                            "details": "Please login first"
+                        }
+                    },
+                    "invalid_jwt": {
+                        "summary": "Invalid or malformed JWT token",
+                        "value": {
+                            "success": False,
+                            "message": "Invalid authentication token",
+                            "details": None
+                        }
+                    },
+                    "expired_jwt": {
+                        "summary": "JWT token expired",
+                        "value": {
+                            "success": False,
+                            "message": "Authentication token expired",
+                            "details": "Please login again"
+                        }
+                    },
+                    "invalid_totp": {
+                        "summary": "Incorrect TOTP code",
+                        "value": {
+                            "success": False,
+                            "message": "Invalid 2FA code",
+                            "details": None
+                        }
+                    }
+                }
+            }
+        }
+    },
+    404: {
+        "model": ErrorResponse,
+        "description": "User not found",
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "User not found",
+                    "details": None
+                }
+            }
+        }
+    }
+}
+
+# 重設密碼請求
+class PasswordResetRequest(BaseModel):
+    # username or email
+    identifier: str = Field(min_length=3, max_length=255)
+
+class PasswordResetResponse(BaseModel):
+    success: bool = True
+    message: str = "Password reset email has been sent"
+    masked_email: str  # Masked email format, e.g., redbean0721@gmail.com -> re****@gm****.com
+
+PASSWORD_RESET_DOC = {
+    404: {
+        "model": ErrorResponse,
+        "description": "User not found",
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "User not found",
+                    "details": None
+                }
+            }
+        }
+    }
+}
+
+# 重設密碼
+class PasswordResetConfirmRequest(BaseModel):
+    token: str = Field(min_length=10)
+    new_password: str = Field(min_length=8, max_length=128)
+
+class PasswordResetConfirmResponse(BaseModel):
+    success: bool = True
+    message: str = "Password has been reset successfully"
+
+PASSWORD_RESET_CONFIRM_DOC = {
+    400: {
+        "model": ErrorResponse,
+        "description": "Invalid or expired token",
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Invalid or expired token",
+                    "details": None
+                }
+            }
+        }
+    },
+    404: {
+        "model": ErrorResponse,
+        "description": "User not found",
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "User not found",
+                    "details": None
+                }
+            }
+        }
+    }
+}
+# 2FA 驗證
+class Verify2FARequest(BaseModel):
+    totp_code: str = Field(min_length=6, max_length=6, pattern=r"^\d{6}$", description="6-digit TOTP code")
+
+class Verify2FAResponse(BaseModel):
+    success: bool = True
+    message: str = "2FA verification successful"
+
+VERIFY_2FA_DOC = {
+    400: {
+        "model": ErrorResponse,
+        "description": "Invalid request or user does not have 2FA enabled",
+        "content": {
+            "application/json": {
+                "examples": {
+                    "no_2fa": {
+                        "summary": "User does not have 2FA enabled",
+                        "value": {
+                            "success": False,
+                            "message": "2FA is not enabled for this account",
+                            "details": None
+                        }
+                    },
+                    "invalid_format": {
+                        "summary": "Invalid TOTP code format",
+                        "value": {
+                            "success": False,
+                            "message": "Invalid TOTP code format",
+                            "details": "TOTP code must be 6 digits"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    401: {
+        "model": ErrorResponse,
+        "description": "Authentication failed - invalid JWT cookie, expired token, or incorrect TOTP code",
+        "content": {
+            "application/json": {
+                "examples": {
+                    "missing_cookie": {
+                        "summary": "Missing 2FA JWT cookie",
+                        "value": {
+                            "success": False,
+                            "message": "2FA cookie not found",
+                            "details": "Please login first"
+                        }
+                    },
+                    "invalid_jwt": {
+                        "summary": "Invalid or malformed JWT token",
+                        "value": {
+                            "success": False,
+                            "message": "Invalid authentication token",
+                            "details": None
+                        }
+                    },
+                    "expired_jwt": {
+                        "summary": "JWT token expired",
+                        "value": {
+                            "success": False,
+                            "message": "Authentication token expired",
+                            "details": "Please login again"
+                        }
+                    },
+                    "invalid_totp": {
+                        "summary": "Incorrect TOTP code",
+                        "value": {
+                            "success": False,
+                            "message": "Invalid 2FA code",
+                            "details": None
+                        }
+                    }
+                }
+            }
+        }
+    },
+    404: {
+        "model": ErrorResponse,
+        "description": "User not found",
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "User not found",
+                    "details": None
+                }
+            }
+        }
+    }
+}

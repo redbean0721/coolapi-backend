@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.2.0-dev] - 2026-01-10
+### Added
+- Implemented complete 2FA (TOTP) verification flow:
+  - Added `/auth/2fa` endpoint for TOTP code verification
+  - Created dedicated 2FA JWT cookie with configurable expiration (`COOKIE_2FA_MAX_AGE`)
+  - Integrated `verify_totp()` utility for secure TOTP validation with configurable time window
+- Implemented password reset functionality:
+  - Added `/auth/password-reset/request` endpoint for initiating password reset via email
+  - Added `/auth/password-reset/confirm` endpoint for completing password reset with token validation
+  - Created `mask_email()` utility to protect user privacy (e.g., `user@example.com` → `use****@exa****.com`)
+- Enhanced event logging with structured naming convention:
+  - Login events: `login.success`, `login.failed.user_not_found`, `login.failed.invalid_password`, `login.failed.inactive_account`, `login.pending.2fa_required`
+  - 2FA events: `2fa.success`, `2fa.failed.invalid_code`
+  - Password reset events: `password_reset_request.success`, `password_reset_request.failed.user_not_found`, `password_reset.success`, `password_reset.failed.invalid_token`
+- Added comprehensive OpenAPI documentation (`TWO_FA_DOC`, `PASSWORD_RESET_DOC`, `PASSWORD_RESET_CONFIRM_DOC`) with detailed error examples
+
+### Changed
+- Updated `create_jwt_token()` to accept `int` (seconds) for simpler expiration handling
+- Improved 2FA cookie lifecycle: automatically deleted after successful verification
+- Enhanced audit logging to cover all authentication state transitions
+
+
 ## [2.2.0-dev] - 2026-01-08
 ### Added
 - Implemented comprehensive event logging system with `events` and `user_event_logs` tables to track user activities and security events.
